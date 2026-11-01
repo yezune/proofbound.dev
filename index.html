@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko" data-lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProofBound</title>
+<meta name="description" content="Proofs bound to the build you ship. LLM agents write formal specifications and proofs for existing binaries; an independent checker re-verifies every release.">
+<meta property="og:title" content="ProofBound">
+<meta property="og:description" content="Proofs bound to the build you ship.">
+<meta property="og:url" content="https://proofbound.dev/">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://proofbound.dev/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --ink: #16181d;
+  --muted: #5b606b;
+  --line: #dddbd3;
+  --accent: #1f5f4a;
+  --accent-soft: #e3eee9;
+  --code-bg: #efeee8;
+  --max: 1080px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317;
+    --surface: #181b20;
+    --ink: #e9e8e3;
+    --muted: #9da2ab;
+    --line: #2b2f36;
+    --accent: #7cc4a8;
+    --accent-soft: #1b2a25;
+    --code-bg: #1d2026;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317;
+  --surface: #181b20;
+  --ink: #e9e8e3;
+  --muted: #9da2ab;
+  --line: #2b2f36;
+  --accent: #7cc4a8;
+  --accent-soft: #1b2a25;
+  --code-bg: #1d2026;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", "IBM Plex Sans KR", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+}
+html[data-lang="ko"] body { font-family: "IBM Plex Sans KR", "IBM Plex Sans", system-ui, sans-serif; word-break: keep-all; }
+html[data-lang="ko"] .en, html[data-lang="en"] .ko { display: none; }
+a { color: var(--accent); }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+@media (min-width: 720px) { .wrap { padding: 0 32px; } }
+.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+header.top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 20px; padding-bottom: 20px; gap: 12px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 18px; color: var(--ink); text-decoration: none; }
+.brand svg { width: 26px; height: 26px; }
+.lang { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.lang button {
+  font: inherit; font-size: 14px; background: transparent; color: var(--muted);
+  border: 0; padding: 6px 14px; cursor: pointer; min-height: 36px;
+}
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+.hero { padding: 56px 0 64px; border-bottom: 1px solid var(--line); }
+.eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 18px; }
+h1 { font-size: clamp(34px, 6vw, 60px); line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 24px; font-weight: 600; max-width: 16ch; }
+html[data-lang="ko"] h1 { max-width: 14em; letter-spacing: -0.03em; }
+.lead { font-size: clamp(18px, 2.2vw, 21px); color: var(--muted); max-width: 40em; margin: 0 0 36px; }
+.question {
+  margin: 0; padding: 22px 24px; background: var(--surface); border: 1px solid var(--line);
+  border-left: 4px solid var(--accent); border-radius: 6px; max-width: 46em;
+}
+.question p { margin: 0; font-size: 18px; }
+.question .label { font-family: "IBM Plex Mono", monospace; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+
+section { padding: 64px 0; border-bottom: 1px solid var(--line); }
+h2 { font-size: clamp(24px, 3.2vw, 32px); line-height: 1.25; margin: 0 0 12px; font-weight: 600; letter-spacing: -0.01em; }
+.sub { color: var(--muted); max-width: 42em; margin: 0 0 36px; }
+
+.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: step; }
+.flow li {
+  counter-increment: step; display: grid; grid-template-columns: 48px 1fr; gap: 16px;
+  padding: 20px 0; border-top: 1px solid var(--line);
+}
+.flow li:last-child { border-bottom: 1px solid var(--line); }
+.flow li::before {
+  content: counter(step, decimal-leading-zero); font-family: "IBM Plex Mono", monospace;
+  color: var(--accent); font-size: 15px; padding-top: 2px;
+}
+.flow h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.flow p { margin: 0; color: var(--muted); }
+.tag {
+  display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .06em; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: 2px;
+}
+.tag.trusted { background: var(--accent-soft); color: var(--accent); }
+.tag.candidate { background: var(--code-bg); color: var(--muted); }
+
+.grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .grid.three { grid-template-columns: repeat(3, 1fr); } .grid.two { grid-template-columns: repeat(2, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 24px; }
+.card h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+.card p { margin: 0; color: var(--muted); font-size: 16px; }
+.card ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 16px; }
+.card .k { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; display: block; }
+
+.verdicts { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 0; padding: 0; list-style: none; }
+.verdicts li { font-family: "IBM Plex Mono", monospace; font-size: 14px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; background: var(--surface); }
+.verdicts li.ok { border-color: var(--accent); color: var(--accent); }
+
+.principles { margin: 0; padding: 0; list-style: none; display: grid; gap: 16px; }
+@media (min-width: 720px) { .principles { grid-template-columns: repeat(2, 1fr); } }
+.principles li { padding-left: 18px; border-left: 2px solid var(--line); }
+.principles strong { display: block; margin-bottom: 4px; }
+.principles span.d { color: var(--muted); font-size: 16px; }
+
+.status { display: grid; gap: 24px; }
+@media (min-width: 720px) { .status { grid-template-columns: 1fr 1.4fr; align-items: start; } }
+.note { font-size: 15px; color: var(--muted); }
+
+footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/" aria-label="ProofBound">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M9 16.5l4.5 4.5L23 11" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ProofBound
+    </a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-set-lang="ko" aria-pressed="true">한국어</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">English</button>
+    </div>
+  </header>
+</div>
+
+<main>
+  <div class="hero"><div class="wrap">
+    <p class="eyebrow"><span class="ko">LLM 기반 바이너리 형식 검증</span><span class="en">LLM-driven binary formal verification</span></p>
+    <h1><span class="ko">배포하는 그 빌드에 결합된 증명.</span><span class="en">Proofs bound to the build you ship.</span></h1>
+    <p class="lead">
+      <span class="ko">기존 소프트웨어의 실행 바이너리와 보안 요구사항을 받아, LLM 에이전트가 형식 명세와 증명을 작성하고 독립된 검사기가 이를 다시 검사합니다. 결과물은 특정 빌드에 결합된 증명과, 그 증명이 보장하는 범위와 가정을 적은 검증 보고서입니다.</span>
+      <span class="en">Give us the shipped binary and your security requirements. LLM agents write the formal specification and the proof; an independent checker re-verifies them. You receive a proof tied to that exact build, and a report stating what it guarantees and under which assumptions.</span>
+    </p>
+    <blockquote class="question">
+      <div class="label"><span class="ko">핵심 질문</span><span class="en">The question we answer</span></div>
+      <p>
+        <span class="ko">명시한 입력·실행 환경 범위에서, 실제로 배포되는 이 바이너리가 공격자가 고른 입력에도 약속한 안전 경계를 벗어나지 않는다는 이유를, 매 릴리스마다 독립적으로 확인할 수 있는가?</span>
+        <span class="en">Within a stated input and execution-environment scope, can you independently confirm — on every release — why the binary you actually ship stays inside its promised safety boundary, even on attacker-chosen input?</span>
+      </p>
+    </blockquote>
+  </div></div>
+
+  <section>
+    <div class="wrap">
+      <h2><span class="ko">어떻게 동작하나</span><span class="en">How it works</span></h2>
+      <p class="sub">
+        <span class="ko">LLM이 만든 것은 모두 검사할 후보입니다. 통과 판정은 고정된 검사기만 내립니다.</span>
+        <span class="en">Everything an LLM produces is a candidate to be checked. Only a pinned, independent checker issues a verdict.</span>
+      </p>
+      <ol class="flow">
+        <li><div>
+          <h3><span class="ko">대상과 요구를 고정</span><span class="en">Pin the target and the requirements</span><span class="tag trusted">trusted</span></h3>
+          <p><span class="ko">요구사항 ID, 위협 모델, 바이너리 해시, 툴체인, 전제조건을 등록합니다. 증명은 이 해시에 묶이고, 배포 파일이 바뀌면 자동으로 만료됩니다.</span><span class="en">Register requirement IDs, threat model, binary hash, toolchain and preconditions. Proofs are bound to that hash and expire automatically when the shipped file changes.</span></p>
+        </div></li>
+        <li><div>
+          <h3><span class="ko">명세 추출과 1차 검토</span><span class="en">Extract and review the specification</span><span class="tag candidate">candidate</span></h3>
+          <p><span class="ko">바이너리에서 동작 명세를 뽑고, LLM이 요구와의 차이를 1차 검토합니다. 정책과 전제는 사람이 정하고, 그 뒤에 정리 문장을 잠급니다.</span><span class="en">Derive a behavioural specification from the binary and let an LLM flag gaps against the requirements. People decide policy and assumptions; only then is the theorem statement locked.</span></p>
+        </div></li>
+        <li><div>
+          <h3><span class="ko">증명 작성</span><span class="en">Write the proof</span><span class="tag candidate">candidate</span></h3>
+          <p><span class="ko">이전 증명 재사용, 엔진의 증명 골격, 결정적 자동화를 먼저 쓰고, 남은 지역 의무만 LLM 에이전트에 맡깁니다. 증명 보조기는 Rocq, 대상 ISA는 AArch64입니다.</span><span class="en">Reuse prior proofs, engine proof skeletons and deterministic automation first; hand only the remaining local obligations to LLM agents. The proof assistant is Rocq; the target ISA is AArch64.</span></p>
+        </div></li>
+        <li><div>
+          <h3><span class="ko">독립 재검사</span><span class="en">Independent re-check</span><span class="tag trusted">trusted</span></h3>
+          <p><span class="ko">고정된 검사기가 등록한 정리 문장, 허용 공리, 생략 여부를 다시 확인합니다. 정리를 약화하거나 증명을 생략하면 실패입니다.</span><span class="en">A pinned checker re-verifies the registered statement, the allowed axioms and the absence of skipped steps. A weakened theorem or an admitted proof is a failure.</span></p>
+        </div></li>
+        <li><div>
+          <h3><span class="ko">릴리스마다 새 증거</span><span class="en">Fresh evidence for every release</span><span class="tag trusted">trusted</span></h3>
+          <p><span class="ko">새 빌드에서는 영향을 받은 의무만 다시 증명하고, 무엇을 다시 확인했는지 증거에 남깁니다.</span><span class="en">On a new build, only the affected obligations are re-proved, and the evidence records exactly what was re-checked.</span></p>
+        </div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2><span class="ko">받게 되는 것</span><span class="en">What you receive</span></h2>
+      <p class="sub"><span class="ko">무엇이 보장되는지, 왜 보장되는지, 어떤 조건에 의존하는지 추적할 수 있는 증거입니다.</span><span class="en">Evidence that lets you trace what is guaranteed, why, and under which conditions.</span></p>
+      <div class="grid two">
+        <div class="card">
+          <span class="k"><span class="ko">빌드 결합 증명</span><span class="en">Build-bound proof</span></span>
+          <h3><span class="ko">바이트에 묶인 증명 패키지</span><span class="en">A proof package tied to the bytes</span></h3>
+          <p><span class="ko">대상 바이너리 해시, 정리 문장, ISA·OS·라이브러리 의미론의 판, 검사기 판을 함께 고정해 누구나 같은 결과를 재현할 수 있습니다.</span><span class="en">Binary hash, theorem statements, the versions of ISA/OS/library semantics and of the checker are pinned together, so anyone can reproduce the result.</span></p>
+        </div>
+        <div class="card">
+          <span class="k"><span class="ko">검증 보고서</span><span class="en">Verification report</span></span>
+          <h3><span class="ko">범위와 가정을 숨기지 않는 보고서</span><span class="en">A report that states scope and assumptions</span></h3>
+          <p><span class="ko">메모리 안전성, 권한, 결과, 종료와 자원 제한을 각각 별도 명제로 표시하고, 각 명제의 입력 제한과 신뢰 기반을 적습니다.</span><span class="en">Memory safety, authorisation, functional results, termination and resource bounds are separate propositions, each listed with its input limits and trusted base.</span></p>
+        </div>
+      </div>
+      <ul class="verdicts" aria-label="Verdicts">
+        <li class="ok"><span class="ko">증명 완료</span><span class="en">proved</span></li>
+        <li><span class="ko">반례 확인</span><span class="en">refuted</span></li>
+        <li><span class="ko">예산 초과</span><span class="en">budget exceeded</span></li>
+        <li><span class="ko">미지원</span><span class="en">unsupported</span></li>
+        <li><span class="ko">명세 보류</span><span class="en">spec on hold</span></li>
+      </ul>
+      <p class="note">
+        <span class="ko">모든 명제는 이 다섯 상태 중 하나로만 기록합니다. 예산 초과를 안전으로 보지 않고, 분모는 착수 전에 등록한 정리 목록입니다.</span>
+        <span class="en">Every proposition ends in exactly one of these five states. A budget overrun never counts as safe, and success rates are measured against the theorem list registered before work begins.</span>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2><span class="ko">대상 분야</span><span class="en">Where it applies</span></h2>
+      <p class="sub"><span class="ko">외부 입력을 받는 파서, 명령 권한 검사, 업데이트 검증, 거래 승인 모듈부터 시작합니다.</span><span class="en">We start with externally facing parsers, command authorisation, update verification and transaction approval.</span></p>
+      <div class="grid three">
+        <div class="card">
+          <span class="k"><span class="ko">자동차 전장</span><span class="en">Automotive</span></span>
+          <h3><span class="ko">진단 게이트웨이·OTA</span><span class="en">Diagnostic gateways · OTA</span></h3>
+          <p><span class="ko">외부 입력의 메모리 손상과, 허가되지 않은 명령이 실행되는 경로를 배제합니다.</span><span class="en">Rule out memory corruption from external input and execution paths for unauthorised commands.</span></p>
+        </div>
+        <div class="card">
+          <span class="k"><span class="ko">로봇</span><span class="en">Robotics</span></span>
+          <h3><span class="ko">원격 명령·안전 감시</span><span class="en">Remote command · safety monitors</span></h3>
+          <p><span class="ko">오래된 명령 거부, 상태별 명령 제한, 소프트웨어상 정지 요청의 보장.</span><span class="en">Stale-command rejection, state-dependent command limits, and guaranteed handling of software stop requests.</span></p>
+        </div>
+        <div class="card">
+          <span class="k"><span class="ko">금융 보안</span><span class="en">Financial security</span></span>
+          <h3><span class="ko">API 게이트웨이·거래 승인</span><span class="en">API gateways · transaction approval</span></h3>
+          <p><span class="ko">테넌트 분리, 승인 우회 방지, 중복 실행 방지와 금액 불변식.</span><span class="en">Tenant isolation, no approval bypass, no duplicate effects, and balance invariants.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2><span class="ko">신뢰 원칙</span><span class="en">Trust principles</span></h2>
+      <p class="sub"><span class="ko">증명 검사의 성공과, 명세가 고객 요구와 맞는지는 별개의 질문입니다. 둘 다 따로 확인합니다.</span><span class="en">A passing proof check and a specification that matches what you need are separate questions. We check both.</span></p>
+      <ul class="principles">
+        <li><strong><span class="ko">LLM은 신뢰 기반 밖에 둡니다</span><span class="en">LLMs stay outside the trusted base</span></strong><span class="d"><span class="ko">명세 추출기, LLM 검토기, 학습한 탐색 정책의 출력은 모두 검사할 후보입니다.</span><span class="en">Spec extractors, LLM reviewers and learned search policies only produce candidates to be checked.</span></span></li>
+        <li><strong><span class="ko">정리는 증명 전에 잠급니다</span><span class="en">Theorems are locked before proving</span></strong><span class="d"><span class="ko">증명 도중 정리 문장을 약화하지 않습니다. 바꿔야 하면 등록부터 고치고 이유를 남깁니다.</span><span class="en">Statements are never weakened mid-proof. Changing one means re-registering it, with the reason recorded.</span></span></li>
+        <li><strong><span class="ko">결함을 잡지 못하는 명세는 통과가 아닙니다</span><span class="en">A spec that misses defects does not pass</span></strong><span class="d"><span class="ko">경계 오류, 권한 검사 제거 같은 결함 변형이 같은 정리를 만족하지 못함을 반례로 확인합니다.</span><span class="en">Injected defects — off-by-one bounds, removed permission checks — must provably fail the same theorem.</span></span></li>
+        <li><strong><span class="ko">같은 커밋, 같은 결과</span><span class="en">Same commit, same result</span></strong><span class="d"><span class="ko">바이너리·명제·의미론·검사기·의존성의 판을 고정하고, 다른 장비에서도 같은 판정이 나와야 합니다.</span><span class="en">Binary, propositions, semantics, checker and dependencies are pinned; another machine must reach the same verdict.</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap status">
+      <div>
+        <h2><span class="ko">현재 상태</span><span class="en">Status</span></h2>
+      </div>
+      <div>
+        <p>
+          <span class="ko">ProofBound는 개념증명(PoC) 단계의 연구개발 프로젝트입니다. AArch64 바이너리를 대상으로 공통 검증 엔진을 만들고 있으며, 산업별 PoC는 아직 시작하지 않았습니다.</span>
+          <span class="en">ProofBound is a research and development project at the proof-of-concept stage. We are building a common verification engine for AArch64 binaries; industry-specific pilots have not started yet.</span>
+        </p>
+        <p class="note">
+          <span class="ko">이 페이지의 기능 설명은 제품 목표입니다. 자동화와 재증명의 비용 효과는 PoC에서 측정하는 중입니다.</span>
+          <span class="en">The capabilities described here are product goals. The cost-effectiveness of automation and re-proving is still being measured in our PoCs.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="wrap">
+  <footer>
+    <span>© 2026 PICOLAB LLC</span>
+    <span class="mono">proofbound.dev</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var buttons = document.querySelectorAll("[data-set-lang]");
+  function apply(lang) {
+    root.setAttribute("data-lang", lang);
+    root.setAttribute("lang", lang);
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].setAttribute("aria-pressed", buttons[i].getAttribute("data-set-lang") === lang ? "true" : "false");
+    }
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("proofbound-lang"); } catch (e) {}
+  var initial = saved || ((navigator.language || "").toLowerCase().indexOf("ko") === 0 ? "ko" : "en");
+  apply(initial);
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener("click", function () {
+      var lang = this.getAttribute("data-set-lang");
+      apply(lang);
+      try { localStorage.setItem("proofbound-lang", lang); } catch (e) {}
+    });
+  }
+})();
+</script>
+</body>
+</html>
